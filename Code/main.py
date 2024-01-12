@@ -5,15 +5,18 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 
 
+
 #Przechowywanie instancji widgetów w listach
 widgets = {
     "logo": [],
     "button": [],
     "score": [],
     "question": [],
+    "answer1": [],
+    "answer2": [],
+    "answer3": [],
+    "answer4": [],
 }
-
-
 
 
 
@@ -26,10 +29,25 @@ window.move(2700, 200)
 window.setStyleSheet("background: #4d4c4d;")
 #161219
 
+
+
+
 #Zainicjalizowanie gridu pod widgety
 grid = QGridLayout()
 
 
+
+#Stworzenie funkcji do generowania przyciskow z odpowiedziami
+def answer_button(answer):
+    #Stworzenie przyciskow dla odpowiedzi
+    button = QPushButton(answer)
+    button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    button.setFixedWidth(485)
+    return button
+
+
+
+#Funkcja, ktora generuje strone startowa
 def frame1():
     #Wrzucenie grafiki i dostosowanie stylu
     image = QPixmap("Images/logo.png")
@@ -61,6 +79,7 @@ def frame1():
 
 
 
+#Funkcja generujaca druga strone z pytaniem i odpowiedziami
 def frame2():
     #Dodanie widgetu scorea
     score = QLabel("80")
@@ -68,11 +87,11 @@ def frame2():
     score.setStyleSheet(
         "font-size: 35px;" +
         "color: white;" +
-        "padding: 20px 15px;" +
-        "margin: 200px 20px;" +
+        "padding: 20px 20px 20px 20px;" +
+        "margin: 20px 200px;" +
         "background: '#64A314';" +
         "border: 1px solid '#64A314';" +
-        "border-radius: 40px;"
+        "border-radius: 20px;"
     )
     widgets["score"].append(score)
     grid.addWidget(widgets["score"][-1], 0, 1)
@@ -89,7 +108,11 @@ def frame2():
         "padding: 75px;"
     )
     widgets["question"].append(question)
-    grid.addWidget(widgets["question"][-1], 1, 1)
+    grid.addWidget(widgets["question"][-1], 1, 0, 1, 2)
+
+    #Tworzenie przyciskow z odpowiedziami
+    
+
 
 
 
