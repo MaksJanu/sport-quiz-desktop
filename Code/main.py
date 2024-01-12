@@ -5,10 +5,12 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 
 
-#Przechowywanie instancji widgetów
+#Przechowywanie instancji widgetów w listach
 widgets = {
     "logo": [],
     "button": [],
+    "score": [],
+    "question": [],
 }
 
 
@@ -56,7 +58,43 @@ def frame1():
     widgets["button"].append(button)
     #Dodanie widgetu do grida oraz umieszczenie go w kolumnie 1 i rzędzie 0
     grid.addWidget(widgets["button"][-1], 1, 0)
-frame1()
+
+
+
+def frame2():
+    #Dodanie widgetu scorea
+    score = QLabel("80")
+    score.setAlignment(QtCore.Qt.AlignCenter)
+    score.setStyleSheet(
+        "font-size: 35px;" +
+        "color: white;" +
+        "padding: 20px 15px;" +
+        "margin: 200px 20px;" +
+        "background: '#64A314';" +
+        "border: 1px solid '#64A314';" +
+        "border-radius: 40px;"
+    )
+    widgets["score"].append(score)
+    grid.addWidget(widgets["score"][-1], 0, 1)
+
+    #Dodanie widgetu gdzie przechowywane bedzie pytanie
+    question = QLabel("Placeholder text will go here!")
+    question.setAlignment(QtCore.Qt.AlignCenter)
+    #Wrapowanie tekstu jezeli bedzie za dlugi, bedzie zapisywac go linia pod linia
+    question.setWordWrap(True)
+    question.setStyleSheet(
+        "font-family: Shanti;" +
+        "font-size: 25px;" +
+        "color: white;" +
+        "padding: 75px;"
+    )
+    widgets["question"].append(question)
+    grid.addWidget(widgets["question"][-1], 1, 1)
+
+
+
+
+
 
 
 
