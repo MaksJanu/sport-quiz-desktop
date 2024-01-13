@@ -52,6 +52,8 @@ def start_game():
     clear_widgets()
     frame2()
 
+
+
 #Stworzenie funkcji do generowania przyciskow z odpowiedziami
 def answer_button(answer, l_margin, r_margin):
     #Stworzenie przyciskow dla odpowiedzi
