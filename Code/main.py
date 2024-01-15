@@ -38,7 +38,7 @@ grid = QGridLayout()
 
 
 #Stworzenie funkcji, ktora odpowiada za usuwanie widgetow
-def clear_widgets()
+def clear_widgets():
     for widget in widgets:
         if widgets[widget] != []:
             widgets[widget][-1].hide()
@@ -61,7 +61,7 @@ def answer_button(answer, l_margin, r_margin):
     button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
     button.setFixedWidth(485)
     button.setStyleSheet(
-        "*{border: 4px solid '#4722dd';" +
+        "*{border: 4px solid '#292555';" +
         "border-radius: 25px;" +
         "font-size: 20px;" +
         "color: white;" +
@@ -69,7 +69,7 @@ def answer_button(answer, l_margin, r_margin):
         "margin-left: " + str(l_margin) + "px;" +
         "margin-right: " + str(r_margin) + "px;" +
         "margin-top: 20px;}" +
-        "*:hover{background: '#4722dd';}"
+        "*:hover{background: '#292555';}"
     )
     return button
 
@@ -78,7 +78,7 @@ def answer_button(answer, l_margin, r_margin):
 #Funkcja, ktora generuje strone startowa
 def frame1():
     #Wrzucenie grafiki i dostosowanie stylu
-    image = QPixmap("Images/logo.png")
+    image = QPixmap("Images/sport_quiz.png")
     logo = QLabel()
     logo.setPixmap(image)
     logo.setAlignment(QtCore.Qt.AlignCenter)
@@ -92,13 +92,13 @@ def frame1():
     button = QPushButton("PLAY")
     button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
     button.setStyleSheet(
-        "*{border: 4px solid '#4722dd';" +
+        "*{border: 4px solid '#292555';" +
         "border-radius: 30px;" +
         "font-size: 35px;" +
         "color: white;" +
         "padding: 15px 0;" +
         "margin: 100px 350px;}" +
-        "*:hover{background: '#4722dd';}"
+        "*:hover{background: '#292555';}"
     )
     #Przechowywanie przycisku jako instancji w liście aby miało scope globalny
     widgets["button"].append(button)
@@ -107,7 +107,7 @@ def frame1():
 
 
 
-#Funkcja generujaca druga strone z pytaniem i odpowiedziami
+#Funkcja generujaca druga strone z pytaniem, odpowiedziami i scorem
 def frame2():
     #Dodanie widgetu scorea
     score = QLabel("80")
@@ -155,12 +155,12 @@ def frame2():
     grid.addWidget(widgets["answer4"][-1], 3, 1,)
 
     #Wrzucenie grafiki mniejszego loga i dostosowanie stylu
-    image = QPixmap("Images/logo_bottom.png")
+    image = QPixmap("Images/sport_quiz_bottom.png")
     logo = QLabel()
     logo.setPixmap(image)
     logo.setAlignment(QtCore.Qt.AlignCenter)
     logo.setStyleSheet(
-        "margin-top: 75px;" +
+        "margin-top: 50px;" +
         "margin-bottom: 30px;"
     )
     #Przechowywanie loga jako instancji w liście aby miało scope globalny
