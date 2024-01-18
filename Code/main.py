@@ -45,9 +45,15 @@ def clear_widgets():
         for _ in range(0, len(widgets[widget])):
             widgets[widget].pop()
 
+#Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
+def show_frame1():
+    clear_widgets()
+    frame1()
 
 
-#Stworzenie funkcji do zarzadzania aplikacja
+
+
+#Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
 def start_game():
     clear_widgets()
     frame2()
@@ -71,6 +77,8 @@ def answer_button(answer, l_margin, r_margin):
         "margin-top: 20px;}" +
         "*:hover{background: '#292555';}"
     )
+    #Przypisanie przycisku odpowiedzi do funkcji show_frame1(TESTOWO)
+    button.clicked.connect(show_frame1)
     return button
 
 
@@ -86,7 +94,7 @@ def frame1():
     #Przechowywanie loga jako instancji w liście aby miało scope globalny
     widgets["logo"].append(logo)
     #Dodanie widgetu do grida oraz umieszczenie go w kolumnie 0 i rzędzie 0
-    grid.addWidget(widgets["logo"][-1], 0, 0)
+    grid.addWidget(widgets["logo"][-1], 0, 0, 1, 2)
 
     #Dodanie widgetu przycisku i wystylizowanie go
     button = QPushButton("PLAY")
@@ -100,10 +108,12 @@ def frame1():
         "margin: 100px 350px;}" +
         "*:hover{background: '#292555';}"
     )
+    #Przypisanie funkcji do przycisku
+    button.clicked.connect(start_game)
     #Przechowywanie przycisku jako instancji w liście aby miało scope globalny
     widgets["button"].append(button)
     #Dodanie widgetu do grida oraz umieszczenie go w kolumnie 1 i rzędzie 0
-    grid.addWidget(widgets["button"][-1], 1, 0)
+    grid.addWidget(widgets["button"][-1], 1, 0, 1, 2)
 
 
 
@@ -167,7 +177,7 @@ def frame2():
     widgets["logo"].append(logo)
     grid.addWidget(widgets["logo"][-1], 4, 0, 1, 2)
 
-frame2()
+frame1()
 
 
 
