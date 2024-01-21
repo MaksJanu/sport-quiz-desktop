@@ -320,7 +320,7 @@ def frame3():
         )
     widgets["score"].append(score)
 
-    #go back to work widget
+    #Kolejny widget z gratulacjami
     message2 = QLabel("Congratulations you've won the quiz!")
     message2.setAlignment(QtCore.Qt.AlignCenter)
     message2.setStyleSheet(
@@ -375,7 +375,7 @@ def frame3():
 
 
 def frame4():
-    #sorry widget
+    #Wyswietlenie wiadomosci o zakonczeniu gry
     message = QLabel("Sorry, this answer \nwas wrong\n your score is:")
     message.setAlignment(QtCore.Qt.AlignRight)
     message.setStyleSheet(
@@ -387,7 +387,7 @@ def frame4():
         )
     widgets["message"].append(message)
 
-    #score widget
+    #Widget score'a
     score = QLabel(str(parameters["score"][-1]))
     score.setStyleSheet(
         "font-size: 100px;" +
@@ -396,7 +396,7 @@ def frame4():
         )
     widgets["score"].append(score)
 
-    #button widget
+    #Dodanie przycisku ponownego startu
     button = QPushButton('TRY AGAIN')
     button.setStyleSheet(
         "*{padding: 25px 0px;" +
@@ -424,7 +424,7 @@ def frame4():
     )
     widgets["logo"].append(logo)
 
-    #place widgets on the grid
+    #Umieszczenie widgetow na gridzie
     grid.addWidget(widgets["message"][-1], 1, 0)
     grid.addWidget(widgets["score"][-1], 1, 1)
     grid.addWidget(widgets["button"][-1], 2, 0, 1, 2)
