@@ -25,26 +25,26 @@ questions_set = get_question_sets()
 
 #Przygotowanie odpowiedzi i pytan
 def preload_data(question_index):
-    question = questions_set["question"][question_index]
-    correct_answer = questions_set["correct_answer"][question_index]
-    wrong_answers = questions_set["incorrect_answers"][question_index]
+    question = html.unescape(questions_set["question"][question_index])
+    correct_answer = html.unescape(questions_set["correct_answer"][question_index])
+    wrong_answers = html.unescape(questions_set["incorrect_answers"][question_index])
 
     #Zastapienie formatowania dla znakow
-    formatting = [
-        ("#039", "'"),
-        ("&", "'"),
-        ("&quot;", '"'),
-        ("&lt;", "<"),
-        ("&gt;", ">"),
-    ]
+    # formatting = [
+    #     ("#039", "'"),
+    #     ("&", "'"),
+    #     ("&quot;", '"'),
+    #     ("&lt;", "<"),
+    #     ("&gt;", ">"),
+    # ]
 
-    #Zastapienie zlych znakow w stringach
-    for tuple in formatting:
-        question = question.replace(tuple[0], tuple[1])
-        correct_answer = correct_answer.replace(tuple[0], tuple[1])
-    #Zastapienia zlych znakow w listach
-        for tuple in formatting:
-            wrong_answers = [char.replace(tuple[0], tuple[1]) for char in wrong_answers]
+    # #Zastapienie zlych znakow w stringach
+    # for tuple in formatting:
+    #     question = question.replace(tuple[0], tuple[1])
+    #     correct_answer = correct_answer.replace(tuple[0], tuple[1])
+    # #Zastapienia zlych znakow w listach
+    #     for tuple in formatting:
+    #         wrong_answers = [char.replace(tuple[0], tuple[1]) for char in wrong_answers]
 
     parameters["question"].append(question)
     parameters["correct"].append(correct_answer)
@@ -65,8 +65,8 @@ parameters = {
     "answer3": [],
     "answer4": [],
     "correct": [],
-    "score": [0],
-    "random_question_index": [random.randint(0,29)],
+    "score": [],
+    "random_question_index": [],
 }
 
 
@@ -83,6 +83,8 @@ widgets = {
     "answer2": [],
     "answer3": [],
     "answer4": [],
+    "message": [],
+    "message2": []
 }
 
 
@@ -112,6 +114,17 @@ def clear_widgets():
         for _ in range(0, len(widgets[widget])):
             widgets[widget].pop()
 
+
+#Stworzenie funkcji, ktora odpowiada za usuwanie parametrow
+def clear_parameters():
+    for parm in parameters:
+        if parameters[parm] != []:
+            for _ in range(0, len(parameters[parm])):
+                parameters[parm].pop()
+    parameters["random_question_index"].append(random.randint(0, 29))
+    parameters["score"].append(0)
+
+
 #Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
 def show_frame1():
     clear_widgets()
@@ -123,6 +136,7 @@ def show_frame1():
 #Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
 def start_game():
     clear_widgets()
+    clear_parameters()
     preload_data(parameters["random_question_index"][-1])
     frame2()
 
@@ -169,9 +183,15 @@ def is_correct(btn):
         widgets["question"][0].setText(parameters["question"][-1])
         for i in range(1, 5):
             widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
+
+        if parameters["score"][-1] == 100:
+            clear_widgets()
+            frame3()
+
     else:
         #Wywolanie kodu po blednej odpowiedzi
         clear_widgets()
+        frame4()
         
 
 
@@ -181,6 +201,7 @@ def is_correct(btn):
 
 #Funkcja, ktora generuje strone startowa
 def frame1():
+    clear_widgets()
     #Wrzucenie grafiki i dostosowanie stylu
     image = QPixmap("Images/sport_quiz.png")
     logo = QLabel()
@@ -245,10 +266,10 @@ def frame2():
     grid.addWidget(widgets["question"][-1], 1, 0, 1, 2)
 
     #Tworzenie przyciskow z odpowiedziami
-    button1 = answer_button(parameters["answer1"][-1], 85, 5)
-    button2 = answer_button(parameters["answer2"][-1], 5, 85)
-    button3 = answer_button(parameters["answer3"][-1], 85, 5)
-    button4 = answer_button(parameters["answer4"][-1], 5, 85)
+    button1 = answer_button(parameters["answer1"][-1], 120, 5)
+    button2 = answer_button(parameters["answer2"][-1], 5, 120)
+    button3 = answer_button(parameters["answer3"][-1], 120, 5)
+    button4 = answer_button(parameters["answer4"][-1], 5, 120)
     #Dodawanie przyciskow do list, ktore sa potrzebne do scopea globalnego
     widgets["answer1"].append(button1)
     widgets["answer2"].append(button2)
@@ -277,7 +298,137 @@ frame1()
 
 
 
+#Stworzenie funckji do wywolania frame'a w przypadku wygranej
+def frame3():
+    #Widget z gratulacjami
+    message = QLabel("Congradulations! You\nare a G!\n your score is:")
+    message.setAlignment(QtCore.Qt.AlignRight)
+    message.setStyleSheet(
+        "font-family: 'Shanti';" +
+        "font-size: 25px;" +
+        "color: 'white';" +
+        "margin: 100px 0px;"
+        )
+    widgets["message"].append(message)
 
+    #score widget
+    score = QLabel(parameters["score"][-1])
+    score.setStyleSheet(
+        "font-size: 100px;" +
+        "color: #8FC740;" +
+        "margin: 0 75px 0px 75px;" 
+        )
+    widgets["score"].append(score)
+
+    #go back to work widget
+    message2 = QLabel("Congratulations you've won the quiz!")
+    message2.setAlignment(QtCore.Qt.AlignCenter)
+    message2.setStyleSheet(
+        "font-family: 'Shanti';" +
+        "font-size: 30px;" +
+        "color: 'white';" +
+        "margin-top:0px;" +
+        "margin-bottom:75px;"
+        )
+    widgets["message2"].append(message2)
+
+    #Stworzenie przycisku i wystylowanie go
+    button = QPushButton('TRY AGAIN')
+    button.setStyleSheet(
+        "*{background:'#BC006C';" +
+        "padding:25px 0px;" +
+        "border: 1px solid '#BC006C';" +
+        "color: 'white';" +
+        "font-family: 'Arial';" +
+        "font-size: 25px;" +
+        "border-radius: 40px;" +
+        "margin: 10px 300px;}" +
+        "*:hover{background:'#ff1b9e';}"
+        )
+    button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    button.clicked.connect(frame1)
+
+    widgets["button"].append(button)
+
+    #Logo widget
+    pixmap = QPixmap('logo_bottom.png')
+    logo = QLabel()
+    logo.setPixmap(pixmap)
+    logo.setAlignment(QtCore.Qt.AlignCenter)
+    logo.setStyleSheet(
+        "padding :10px;" +
+        "margin-top:75px;" +
+        "margin-bottom: 20px;"
+    )
+    widgets["logo"].append(logo)
+
+    #Umiejscowienie widgetow na gridzie
+    grid.addWidget(widgets["message"][-1], 2, 0)
+    grid.addWidget(widgets["score"][-1], 2, 1)
+    grid.addWidget(widgets["message2"][-1], 3, 0, 1, 2)
+    grid.addWidget(widgets["button"][-1], 4, 0, 1, 2)
+    grid.addWidget(widgets["logo"][-1], 5, 0, 2, 2)
+
+
+
+
+
+
+def frame4():
+    #sorry widget
+    message = QLabel("Sorry, this answer \nwas wrong\n your score is:")
+    message.setAlignment(QtCore.Qt.AlignRight)
+    message.setStyleSheet(
+        "font-family: 'Shanti';" +
+        "font-size: 35px;" +
+        "color: 'white';" +
+        "margin: 75px 5px;" +
+        "padding:20px;" 
+        )
+    widgets["message"].append(message)
+
+    #score widget
+    score = QLabel(str(parameters["score"][-1]))
+    score.setStyleSheet(
+        "font-size: 100px;" +
+        "color: white;" +
+        "margin: 0 75px 0px 75px;"
+        )
+    widgets["score"].append(score)
+
+    #button widget
+    button = QPushButton('TRY AGAIN')
+    button.setStyleSheet(
+        "*{padding: 25px 0px;" +
+        "border: 4px solid '#292555';" +
+        "color: 'white';" +
+        "font-family: 'Arial';" +
+        "font-size: 35px;" +
+        "border-radius: 40px;" +
+        "margin: 10px 200px;}" +
+        "*:hover{background: '#292555';}"
+        )
+    button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    button.clicked.connect(frame1)
+
+    widgets["button"].append(button)
+
+    #logo widget
+    pixmap = QPixmap('Images/sport_quiz_bottom.png')
+    logo = QLabel()
+    logo.setPixmap(pixmap)
+    logo.setAlignment(QtCore.Qt.AlignCenter)
+    logo.setStyleSheet(
+        "padding :10px;" +
+        "margin-top:75px;"
+    )
+    widgets["logo"].append(logo)
+
+    #place widgets on the grid
+    grid.addWidget(widgets["message"][-1], 1, 0)
+    grid.addWidget(widgets["score"][-1], 1, 1)
+    grid.addWidget(widgets["button"][-1], 2, 0, 1, 2)
+    grid.addWidget(widgets["logo"][-1], 3, 0, 1, 2)
 
 
 
