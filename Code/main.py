@@ -4,6 +4,68 @@ from PyQt5.QtGui import QPixmap
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 
+import requests
+import pandas as pd
+import random
+import html
+
+
+#Pobieranie z API bazy pytan i odpowiedzi o sportach
+def get_question_sets():
+    response = requests.get(url="https://opentdb.com/api.php?amount=30&category=21&difficulty=easy&type=multiple")
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data["results"])
+        return df
+    elif response.status_code == 404:
+        return False
+    
+#Wywolanie funkcji aby przypisac dataframe'a do zmiennej
+questions_set = get_question_sets()
+
+#Przygotowanie odpowiedzi i pytan
+def preload_data():
+    question = questions_set["question"][0]
+    correct_answer = questions_set["correct_answer"][0]
+    wrong_answers = questions_set["incorrect_answers"][0]
+
+    #Zastapienie formatowania dla znakow
+    formatting = [
+        ("#039", "'"),
+        ("&", "'"),
+        ("&quot;", '"'),
+        ("&lt;", "<"),
+        ("&gt;", ">"),
+    ]
+
+
+
+
+
+
+    parameters["question"].append(question)
+    parameters["correct"].append(correct_answer)
+    #Scalenie wszystkich odpowiedzi i przetasowanie
+    all_answers = wrong_answers + [correct_answer]
+    random.shuffle(all_answers)
+    #Dodawanie odpowiedzi do parameters
+    for i in range(0, 4):
+        parameters[f"answer{i+1}"].append(all_answers[i])
+
+    return all_answers
+
+#Przechowywanie pytan i odpowiedzi w slowniku
+parameters = {
+    "question": [],
+    "answer1": [],
+    "answer2": [],
+    "answer3": [],
+    "answer4": [],
+    "correct": [],
+}
+print(preload_data())
+
+
 
 
 #Przechowywanie instancji widgetów w listach
@@ -135,7 +197,7 @@ def frame2():
     grid.addWidget(widgets["score"][-1], 0, 1)
 
     #Dodanie widgetu gdzie przechowywane bedzie pytanie
-    question = QLabel("Placeholder text will go here!")
+    question = QLabel(parameters["question"][-1])
     question.setAlignment(QtCore.Qt.AlignCenter)
     #Wrapowanie tekstu jezeli bedzie za dlugi, bedzie zapisywac go linia pod linia
     question.setWordWrap(True)
