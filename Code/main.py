@@ -24,10 +24,10 @@ def get_question_sets():
 questions_set = get_question_sets()
 
 #Przygotowanie odpowiedzi i pytan
-def preload_data():
-    question = questions_set["question"][0]
-    correct_answer = questions_set["correct_answer"][0]
-    wrong_answers = questions_set["incorrect_answers"][0]
+def preload_data(question_index):
+    question = questions_set["question"][question_index]
+    correct_answer = questions_set["correct_answer"][question_index]
+    wrong_answers = questions_set["incorrect_answers"][question_index]
 
     #Zastapienie formatowania dla znakow
     formatting = [
@@ -38,10 +38,13 @@ def preload_data():
         ("&gt;", ">"),
     ]
 
-
-
-
-
+    #Zastapienie zlych znakow w stringach
+    for tuple in formatting:
+        question = question.replace(tuple[0], tuple[1])
+        correct_answer = correct_answer.replace(tuple[0], tuple[1])
+    #Zastapienia zlych znakow w listach
+        for tuple in formatting:
+            wrong_answers = [char.replace(tuple[0], tuple[1]) for char in wrong_answers]
 
     parameters["question"].append(question)
     parameters["correct"].append(correct_answer)
@@ -62,8 +65,10 @@ parameters = {
     "answer3": [],
     "answer4": [],
     "correct": [],
+    "score": [0],
+    "random_question_index": [random.randint(0,29)],
 }
-print(preload_data())
+
 
 
 
@@ -118,6 +123,7 @@ def show_frame1():
 #Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
 def start_game():
     clear_widgets()
+    preload_data(parameters["random_question_index"][-1])
     frame2()
 
 
@@ -139,9 +145,37 @@ def answer_button(answer, l_margin, r_margin):
         "margin-top: 20px;}" +
         "*:hover{background: '#292555';}"
     )
-    #Przypisanie przycisku odpowiedzi do funkcji show_frame1(TESTOWO)
-    button.clicked.connect(show_frame1)
+    #Przypisanie przycisku odpowiedzi do funkcji 
+    button.clicked.connect(lambda x: is_correct(button))
     return button
+
+
+def is_correct(btn):
+    if btn.text() == parameters["correct"][-1]:
+        print(f"{btn.text()} is correct")
+
+        #Aktualizowanie score'a po poprawnej odpowiedzi
+        temp_score = parameters["score"][-1]
+        parameters["score"].pop()
+        parameters["score"].append(temp_score + 10)
+
+        #Losowanie kolejnego indexu dla kolejnego pytania
+        parameters["random_question_index"].pop()
+        parameters["random_question_index"].append(random.randint(0, 29))
+        preload_data(parameters["random_question_index"][-1])
+
+        #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania
+        widgets["score"][-1].setText(str(parameters["score"][-1]))
+        widgets["question"][0].setText(parameters["question"][-1])
+        for i in range(1, 5):
+            widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
+    else:
+        #Wywolanie kodu po blednej odpowiedzi
+        clear_widgets()
+        
+
+
+
 
 
 
@@ -182,7 +216,7 @@ def frame1():
 #Funkcja generujaca druga strone z pytaniem, odpowiedziami i scorem
 def frame2():
     #Dodanie widgetu scorea
-    score = QLabel("80")
+    score = QLabel(str(parameters["score"][-1]))
     score.setAlignment(QtCore.Qt.AlignCenter)
     score.setStyleSheet(
         "font-size: 35px;" +
@@ -211,10 +245,10 @@ def frame2():
     grid.addWidget(widgets["question"][-1], 1, 0, 1, 2)
 
     #Tworzenie przyciskow z odpowiedziami
-    button1 = answer_button("answer1", 85, 5)
-    button2 = answer_button("answer2", 5, 85)
-    button3 = answer_button("answer3", 85, 5)
-    button4 = answer_button("answer4", 5, 85)
+    button1 = answer_button(parameters["answer1"][-1], 85, 5)
+    button2 = answer_button(parameters["answer2"][-1], 5, 85)
+    button3 = answer_button(parameters["answer3"][-1], 85, 5)
+    button4 = answer_button(parameters["answer4"][-1], 5, 85)
     #Dodawanie przyciskow do list, ktore sa potrzebne do scopea globalnego
     widgets["answer1"].append(button1)
     widgets["answer2"].append(button2)
