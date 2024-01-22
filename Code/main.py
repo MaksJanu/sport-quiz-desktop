@@ -4,30 +4,35 @@ from PyQt5.QtGui import QPixmap
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import QTimer
+import time
 
 import requests
 import pandas as pd
 import random
 import html
 
+global difficulty
+difficulty=""
+
 
 #Pobieranie z API bazy pytan i odpowiedzi o sportach
 def get_question_sets(difficulty):
-    response = requests.get(url=f"https://opentdb.com/api.php?amount=30&category=21&difficulty={difficulty}&type=multiple")
+    response = requests.get(url=f"https://opentdb.com/api.php?amount=15&category=21&difficulty={difficulty}&type=multiple")
     print("API Response:", response.text)
     if response.status_code == 200:
         data = response.json()
-        df = pd.DataFrame(data["results"])
-        return df
-    elif response.status_code == 404:
-        return False
-#print(get_question_sets("easy")["question"])
-#Wywolanie funkcji aby przypisac dataframe'a do zmiennej
+        if data["response_code"] == 0 and data["results"] != []:
+            df = pd.DataFrame(data["results"])
+            return df
+        else:
+            return 0
+    elif response.status_code != 200:
+        return 0
+
 
 
 #Przygotowanie odpowiedzi i pytan
 def preload_data(question_index, question_set):
-
     question = html.unescape(question_set["question"][question_index])
     correct_answer = html.unescape(question_set["correct_answer"][question_index])
     wrong_answers = question_set["incorrect_answers"][question_index]
@@ -73,7 +78,6 @@ parameters = {
     "correct": [],
     "score": [],
     "random_question_index": [],
-    "difficulty-name": [],
 }
 
 
@@ -131,14 +135,12 @@ def clear_parameters():
         if parameters[parm] != []:
             for _ in range(0, len(parameters[parm])):
                 parameters[parm].pop()
-    parameters["difficulty-name"] = []
-    parameters["random_question_index"].append(random.randint(0, 29))
+    parameters["random_question_index"].append(random.randint(0, 14))
     parameters["score"].append(0)
 
 
 #Aktualizacja nazwy difficulty
 def on_button_click(button):
-
     button.setStyleSheet(
         "*{border: 4px solid '#292555';" +
         "border-radius: 100px;" +
@@ -147,13 +149,10 @@ def on_button_click(button):
         "padding: 5px ;" +
         "margin: 2px 350px;}" +
         "*:hover{background: '#64A314';}" 
-        
         )
-    parameters["difficulty-name"] = []
-    parameters["difficulty-name"].append(button.text().lower())
-    print(parameters["difficulty-name"][-1])
-
-
+    global difficulty
+    difficulty = button.text().lower()
+    print(difficulty)
 
 
 #Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
@@ -162,17 +161,18 @@ def show_frame1():
     frame1()
 
 
-
-
 #Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
-def start_game(difficulty):
-    if difficulty != "":
-        clear_widgets()
-        clear_parameters() #TU JEST BLAD
-        questions_set = get_question_sets(difficulty)
-        print(questions_set)
-        preload_data(parameters["random_question_index"][-1], questions_set)
-        frame2()
+def start_game(difficulty_level):
+    print(difficulty_level)
+    if difficulty_level != "" and difficulty_level != None:
+        questions_set = get_question_sets(difficulty_level)
+        if type(questions_set) == int:
+            print("API NIE DZIALA")
+        else:
+            clear_widgets()
+            clear_parameters()
+            preload_data(parameters["random_question_index"][-1], questions_set)
+            frame2()
     # Dodaj czasomierz jako pasek postępu
 
 
@@ -211,28 +211,26 @@ def is_correct(btn):
 
         #Losowanie kolejnego indexu dla kolejnego pytania
         parameters["random_question_index"].pop()
-        parameters["random_question_index"].append(random.randint(0, 29))
-        preload_data(parameters["random_question_index"][-1])
-
-        #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania
-        widgets["score"][-1].setText(str(parameters["score"][-1]))
-        widgets["question"][0].setText(parameters["question"][-1])
-        for i in range(1, 5):
-            widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
+        parameters["random_question_index"].append(random.randint(0, 14))
+        questions_set=get_question_sets(difficulty)
+        if type(questions_set) == int:
+            print("API NIE DZIALA")
+        else:
+            preload_data(parameters["random_question_index"][-1],questions_set)
+            #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania
+            widgets["score"][-1].setText(str(parameters["score"][-1]))
+            widgets["question"][0].setText(parameters["question"][-1])
+            for i in range(1, 5):
+                widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
 
         if parameters["score"][-1] == 100:
             clear_widgets()
             frame3()
-
     else:
         #Wywolanie kodu po blednej odpowiedzi
         clear_widgets()
         frame4()
         
-
-
-
-
 
 
 #Funkcja, ktora generuje strone startowa
@@ -262,7 +260,7 @@ def frame1():
         "*:hover{background: '#292555';}"
     )
     #Przypisanie funkcji do przycisku
-    button.clicked.connect(lambda: start_game(parameters["difficulty-name"][-1]))
+    button.clicked.connect(lambda: start_game(difficulty))
     #Przechowywanie przycisku jako instancji w liście aby miało scope globalny
     widgets["button"].append(button)
     #Dodanie widgetu do grida oraz umieszczenie go w kolumnie 1 i rzędzie 0
@@ -446,7 +444,7 @@ def frame3():
     widgets["button"].append(button)
 
     #Logo widget
-    pixmap = QPixmap('logo_bottom.png')
+    pixmap = QPixmap('Images/logo_bottom.png')
     logo = QLabel()
     logo.setPixmap(pixmap)
     logo.setAlignment(QtCore.Qt.AlignCenter)
@@ -471,6 +469,8 @@ def frame3():
 
 def frame4():
     #Wyswietlenie wiadomosci o zakonczeniu gry
+    global difficulty
+    difficulty=""
     message = QLabel("Sorry, this answer \nwas wrong\n your score is:")
     message.setAlignment(QtCore.Qt.AlignRight)
     message.setStyleSheet(
@@ -491,7 +491,7 @@ def frame4():
         )
     widgets["score"].append(score)
 
-    #Dodanie przycisku ponownego startu
+  #Dodanie przycisku ponownego startu
     button = QPushButton('TRY AGAIN')
     button.setStyleSheet(
         "*{padding: 25px 0px;" +
