@@ -12,24 +12,29 @@ import html
 
 
 #Pobieranie z API bazy pytan i odpowiedzi o sportach
-def get_question_sets():
-    response = requests.get(url="https://opentdb.com/api.php?amount=30&category=21&difficulty=easy&type=multiple")
+def get_question_sets(difficulty):
+    response = requests.get(url=f"https://opentdb.com/api.php?amount=30&category=21&difficulty={difficulty}&type=multiple")
+    print("API Response:", response.text)
     if response.status_code == 200:
         data = response.json()
         df = pd.DataFrame(data["results"])
         return df
     elif response.status_code == 404:
         return False
-    
+#print(get_question_sets("easy")["question"])
 #Wywolanie funkcji aby przypisac dataframe'a do zmiennej
-questions_set = get_question_sets()
+
 
 #Przygotowanie odpowiedzi i pytan
-def preload_data(question_index):
-    question = html.unescape(questions_set["question"][question_index])
-    correct_answer = html.unescape(questions_set["correct_answer"][question_index])
-    wrong_answers = html.unescape(questions_set["incorrect_answers"][question_index])
+def preload_data(question_index, question_set):
 
+    question = html.unescape(question_set["question"][question_index])
+    correct_answer = html.unescape(question_set["correct_answer"][question_index])
+    wrong_answers = question_set["incorrect_answers"][question_index]
+
+    print("Question:", question)
+    print("Correct Answer:", correct_answer)
+    print("Wrong Answers:", wrong_answers)
     #Zastapienie formatowania dla znakow
     # formatting = [
     #     ("#039", "'"),
@@ -68,6 +73,7 @@ parameters = {
     "correct": [],
     "score": [],
     "random_question_index": [],
+    "difficulty-name": [],
 }
 
 
@@ -86,7 +92,9 @@ widgets = {
     "answer4": [],
     "message": [],
     "message2": [],
-    "timer_bar": [],  
+    "difficulty-easy": [],
+    "difficulty-medium": [],
+    "difficulty-hard": [],
 }
 
 
@@ -110,11 +118,11 @@ grid = QGridLayout()
 
 #Stworzenie funkcji, ktora odpowiada za usuwanie widgetow
 def clear_widgets():
-    for widget in widgets:
-        if widgets[widget] != []:
-            widgets[widget][-1].hide()
-        for _ in range(0, len(widgets[widget])):
-            widgets[widget].pop()
+    for widget_name in widgets:
+        if widgets[widget_name] != []:
+            widgets[widget_name][-1].hide()
+        for _ in range(0, len(widgets[widget_name])):
+            widgets[widget_name].pop()
 
 
 #Stworzenie funkcji, ktora odpowiada za usuwanie parametrow
@@ -123,13 +131,27 @@ def clear_parameters():
         if parameters[parm] != []:
             for _ in range(0, len(parameters[parm])):
                 parameters[parm].pop()
+    parameters["difficulty-name"] = []
     parameters["random_question_index"].append(random.randint(0, 29))
     parameters["score"].append(0)
 
 
-# Dodanie czasomierza
+#Aktualizacja nazwy difficulty
+def on_button_click(button):
 
-
+    button.setStyleSheet(
+        "*{border: 4px solid '#292555';" +
+        "border-radius: 100px;" +
+        "font-size: 20px;" +
+        "color: white;" +
+        "padding: 5px ;" +
+        "margin: 2px 350px;}" +
+        "*:hover{background: '#64A314';}" 
+        
+        )
+    parameters["difficulty-name"] = []
+    parameters["difficulty-name"].append(button.text().lower())
+    print(parameters["difficulty-name"][-1])
 
 
 
@@ -143,11 +165,14 @@ def show_frame1():
 
 
 #Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
-def start_game():
-    clear_widgets()
-    clear_parameters()
-    preload_data(parameters["random_question_index"][-1])
-    frame2()
+def start_game(difficulty):
+    if difficulty != "":
+        clear_widgets()
+        clear_parameters() #TU JEST BLAD
+        questions_set = get_question_sets(difficulty)
+        print(questions_set)
+        preload_data(parameters["random_question_index"][-1], questions_set)
+        frame2()
     # Dodaj czasomierz jako pasek postępu
 
 
@@ -233,15 +258,64 @@ def frame1():
         "font-size: 35px;" +
         "color: white;" +
         "padding: 15px 0;" +
-        "margin: 100px 350px;}" +
+        "margin: 25px 350px;}" +
         "*:hover{background: '#292555';}"
     )
     #Przypisanie funkcji do przycisku
-    button.clicked.connect(start_game)
+    button.clicked.connect(lambda: start_game(parameters["difficulty-name"][-1]))
     #Przechowywanie przycisku jako instancji w liście aby miało scope globalny
     widgets["button"].append(button)
     #Dodanie widgetu do grida oraz umieszczenie go w kolumnie 1 i rzędzie 0
     grid.addWidget(widgets["button"][-1], 1, 0, 1, 2)
+
+
+    # Dodanie przycisków poziomu trudności
+    easy_button = QPushButton("Easy")
+    easy_button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    easy_button.setStyleSheet(
+        "*{border: 4px solid '#292555';" +
+        "border-radius: 30px;" +
+        "font-size: 20px;" +
+        "color: white;" +
+        "padding: 5px ;" +
+        "margin: 2px 350px;}" +
+        "*:hover{background: '#292555';}"
+    )
+    widgets["difficulty-easy"].append(easy_button)
+    grid.addWidget(widgets["difficulty-easy"][-1], 2, 0, 1, 2)
+    easy_button.clicked.connect(lambda: on_button_click(easy_button))
+
+
+    medium_button = QPushButton("Medium")
+    medium_button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    medium_button.setStyleSheet(
+        "*{border: 4px solid '#292555';" +
+        "border-radius: 30px;" +
+        "font-size: 20px;" +
+        "color: white;" +
+        "padding: 5px 0;" +
+        "margin: 2px 350px;}" +
+        "*:hover{background: '#292555';}"
+    )
+    widgets["difficulty-medium"].append(medium_button)
+    grid.addWidget(widgets["difficulty-medium"][-1], 3, 0, 1, 2)
+    medium_button.clicked.connect(lambda: on_button_click(medium_button))
+
+
+    hard_button = QPushButton("Hard")
+    hard_button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
+    hard_button.setStyleSheet(
+        "*{border: 4px solid '#292555';" +
+        "border-radius: 30px;" +
+        "font-size: 20px;" +
+        "color: white;" +
+        "padding: 5px 0;" +
+        "margin: 2px 350px;}" +
+        "*:hover{background: '#292555';}"
+    )
+    widgets["difficulty-hard"].append(hard_button) # Dodanie przycisków do słownika widgets
+    grid.addWidget(widgets["difficulty-hard"][-1], 4, 0, 1, 2)
+    hard_button.clicked.connect(lambda: on_button_click(hard_button))
 
 
 
