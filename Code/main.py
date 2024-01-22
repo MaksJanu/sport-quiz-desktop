@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, QProgressBar
 from PyQt5.QtGui import QPixmap
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import QTimer
 
 import requests
 import pandas as pd
@@ -84,7 +85,8 @@ widgets = {
     "answer3": [],
     "answer4": [],
     "message": [],
-    "message2": []
+    "message2": [],
+    "timer_bar": [],  
 }
 
 
@@ -96,7 +98,7 @@ window.setWindowTitle("Sport Quiz")
 window.setFixedWidth(1000)
 window.move(2700, 200)
 window.setStyleSheet("background: #4d4c4d;")
-#161219
+
 
 
 
@@ -125,6 +127,13 @@ def clear_parameters():
     parameters["score"].append(0)
 
 
+# Dodanie czasomierza
+
+
+
+
+
+
 #Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
 def show_frame1():
     clear_widgets()
@@ -139,6 +148,8 @@ def start_game():
     clear_parameters()
     preload_data(parameters["random_question_index"][-1])
     frame2()
+    # Dodaj czasomierz jako pasek postępu
+
 
 
 
@@ -236,6 +247,7 @@ def frame1():
 
 #Funkcja generujaca druga strone z pytaniem, odpowiedziami i scorem
 def frame2():
+
     #Dodanie widgetu scorea
     score = QLabel(str(parameters["score"][-1]))
     score.setAlignment(QtCore.Qt.AlignCenter)
@@ -254,6 +266,7 @@ def frame2():
     #Dodanie widgetu gdzie przechowywane bedzie pytanie
     question = QLabel(parameters["question"][-1])
     question.setAlignment(QtCore.Qt.AlignCenter)
+
     #Wrapowanie tekstu jezeli bedzie za dlugi, bedzie zapisywac go linia pod linia
     question.setWordWrap(True)
     question.setStyleSheet(
@@ -270,11 +283,13 @@ def frame2():
     button2 = answer_button(parameters["answer2"][-1], 5, 120)
     button3 = answer_button(parameters["answer3"][-1], 120, 5)
     button4 = answer_button(parameters["answer4"][-1], 5, 120)
+
     #Dodawanie przyciskow do list, ktore sa potrzebne do scopea globalnego
     widgets["answer1"].append(button1)
     widgets["answer2"].append(button2)
     widgets["answer3"].append(button3)
     widgets["answer4"].append(button4)
+
     #Dodawanie przyciskow odpowiedzi do grida
     grid.addWidget(widgets["answer1"][-1], 2, 0,)
     grid.addWidget(widgets["answer2"][-1], 2, 1,)
@@ -290,9 +305,15 @@ def frame2():
         "margin-top: 50px;" +
         "margin-bottom: 30px;"
     )
+
     #Przechowywanie loga jako instancji w liście aby miało scope globalny
     widgets["logo"].append(logo)
     grid.addWidget(widgets["logo"][-1], 4, 0, 1, 2)
+
+    # Dodanie etykiety czasomierza
+
+
+
 
 frame1()
 
