@@ -1,10 +1,8 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, QProgressBar
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QGridLayout
 from PyQt5.QtGui import QPixmap
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
-from PyQt5.QtCore import QTimer
-import time
 
 import requests
 import pandas as pd
@@ -13,6 +11,8 @@ import html
 
 global difficulty
 difficulty=""
+global current_score
+current_score = 0
 
 
 #Pobieranie z API bazy pytan i odpowiedzi o sportach
@@ -69,6 +69,7 @@ def preload_data(question_index, question_set):
     return all_answers
 
 #Przechowywanie pytan i odpowiedzi w slowniku
+global parameters
 parameters = {
     "question": [],
     "answer1": [],
@@ -203,27 +204,26 @@ def answer_button(answer, l_margin, r_margin):
 def is_correct(btn):
     if btn.text() == parameters["correct"][-1]:
         print(f"{btn.text()} is correct")
-
-        #Aktualizowanie score'a po poprawnej odpowiedzi
-        temp_score = parameters["score"][-1]
-        parameters["score"].pop()
-        parameters["score"].append(temp_score + 10)
-
+        
         #Losowanie kolejnego indexu dla kolejnego pytania
         parameters["random_question_index"].pop()
         parameters["random_question_index"].append(random.randint(0, 14))
         questions_set=get_question_sets(difficulty)
+        #Handlowanie bledow wynikajacych z api
         if type(questions_set) == int:
             print("API NIE DZIALA")
         else:
             preload_data(parameters["random_question_index"][-1],questions_set)
-            #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania
-            widgets["score"][-1].setText(str(parameters["score"][-1]))
+            #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania oraz scorea
+            global current_score
+            current_score += 10
+
+            widgets["score"][-1].setText(str(current_score))
             widgets["question"][0].setText(parameters["question"][-1])
             for i in range(1, 5):
                 widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
 
-        if parameters["score"][-1] == 100:
+        if current_score == 20:
             clear_widgets()
             frame3()
     else:
@@ -235,6 +235,8 @@ def is_correct(btn):
 
 #Funkcja, ktora generuje strone startowa
 def frame1():
+    global current_score
+    current_score = 0
     clear_widgets()
     #Wrzucenie grafiki i dostosowanie stylu
     image = QPixmap("Images/sport_quiz.png")
@@ -319,9 +321,10 @@ def frame1():
 
 #Funkcja generujaca druga strone z pytaniem, odpowiedziami i scorem
 def frame2():
-
     #Dodanie widgetu scorea
-    score = QLabel(str(parameters["score"][-1]))
+    global current_score
+    
+    score = QLabel(str(current_score))
     score.setAlignment(QtCore.Qt.AlignCenter)
     score.setStyleSheet(
         "font-size: 35px;" +
@@ -334,6 +337,7 @@ def frame2():
     )
     widgets["score"].append(score)
     grid.addWidget(widgets["score"][-1], 0, 1)
+
 
     #Dodanie widgetu gdzie przechowywane bedzie pytanie
     question = QLabel(parameters["question"][-1])
@@ -382,9 +386,6 @@ def frame2():
     widgets["logo"].append(logo)
     grid.addWidget(widgets["logo"][-1], 4, 0, 1, 2)
 
-    # Dodanie etykiety czasomierza
-
-
 
 
 frame1()
@@ -405,7 +406,7 @@ def frame3():
     widgets["message"].append(message)
 
     #score widget
-    score = QLabel(parameters["score"][-1])
+    score = QLabel(str(current_score))
     score.setStyleSheet(
         "font-size: 100px;" +
         "color: #8FC740;" +
@@ -428,15 +429,14 @@ def frame3():
     #Stworzenie przycisku i wystylowanie go
     button = QPushButton('TRY AGAIN')
     button.setStyleSheet(
-        "*{background:'#BC006C';" +
-        "padding:25px 0px;" +
-        "border: 1px solid '#BC006C';" +
+        "*{padding: 25px 0px;" +
+        "border: 4px solid '#292555';" +
         "color: 'white';" +
         "font-family: 'Arial';" +
         "font-size: 25px;" +
         "border-radius: 40px;" +
         "margin: 10px 300px;}" +
-        "*:hover{background:'#ff1b9e';}"
+        "*:hover{background:'#292555';}"
         )
     button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
     button.clicked.connect(frame1)
@@ -483,7 +483,7 @@ def frame4():
     widgets["message"].append(message)
 
     #Widget score'a
-    score = QLabel(str(parameters["score"][-1]))
+    score = QLabel(str(current_score))
     score.setStyleSheet(
         "font-size: 100px;" +
         "color: white;" +
