@@ -4,6 +4,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 
+import json
+from datetime import datetime
 import requests
 import pandas as pd
 import random
@@ -156,6 +158,24 @@ def on_button_click(button):
     print(difficulty)
 
 
+#Stworzenie funkcji do zapisu czasu i scorea wraz z sortowaniem
+def write_to_json(points):
+    now = datetime.now()
+    time = now.strftime("%H:%M:%S")
+    score_data = {
+        "godzina": time,
+        "punktacja": points,
+    }
+    with open(file = "score.json", mode = "w+", encoding = "UTF-8") as file:
+        json.dump(score_data, file)
+
+
+
+
+
+
+
+
 #Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
 def show_frame1():
     clear_widgets()
@@ -223,11 +243,13 @@ def is_correct(btn):
             for i in range(1, 5):
                 widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
 
-        if current_score == 20:
+        if current_score == 100:
+            write_to_json(current_score)
             clear_widgets()
             frame3()
     else:
         #Wywolanie kodu po blednej odpowiedzi
+        write_to_json(current_score)
         clear_widgets()
         frame4()
         
