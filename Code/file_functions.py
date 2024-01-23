@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import os
 
 
 #Stworzenie funkcji do zapisu czasu i scorea wraz z sortowaniem
@@ -11,11 +12,9 @@ def write_to_json(points, level):
     except FileNotFoundError:
         # Jeśli plik nie istnieje, tworzymy nowy pusty słownik
         data = {"rekordy": []}
-
     # Pobieranie aktualnej daty oraz czasu
     now = datetime.now()
     time = now.strftime("%H:%M:%S")
-
     # Dodawanie nowego rekordu z czasem i punktacją
     new_record = {
         "czas": time,
@@ -38,7 +37,6 @@ def sort_records_by_points():
     except FileNotFoundError:
         print("Brak pliku z danymi.")
         return
-
     # Pobranie listy rekordów
     records = data.get("rekordy", [])
 
@@ -47,12 +45,33 @@ def sort_records_by_points():
     for i in range(n - 1):
         for j in range(0, n - i - 1):
             if records[j]["punktacja"] < records[j + 1]["punktacja"]:
-                # Zamiana miejscami, jeśli punktacja jest w niewłaściwej kolejności
                 records[j], records[j + 1] = records[j + 1], records[j]
-
     # Aktualizacja danych w słowniku
     data["rekordy"] = records
-
     # Zapisywanie posortowanych danych z powrotem do pliku JSON
     with open('score.json', 'w') as file:
         json.dump(data, file, indent=2)
+
+
+
+
+#______Testy______
+        
+# Funkcja pomocnicza do usuwania pliku JSON przed testami
+def remove_score_file():
+    try:
+        os.remove('score.json')
+    except FileNotFoundError:
+        pass
+
+# Test funkcji write_to_json
+def test_write_to_json():
+    # Usunięcie ewentualnego istniejącego pliku przed testem
+    remove_score_file()
+    # Przygotowanie danych do testu
+    points = 100
+    level = "easy"
+    # Wywołanie funkcji write_to_json
+    write_to_json(points, level)
+    # Sprawdzenie, czy plik score.json został utworzony
+    assert os.path.exists('score.json')

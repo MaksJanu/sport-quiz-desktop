@@ -4,56 +4,12 @@ from PyQt5.QtGui import QPixmap
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 
-import requests
-import pandas as pd
 import random
-import html
 
 from file_functions import *
 from data_functions import *
 from clear_functions import *
-
-
-
-global difficulty
-difficulty=""
-global current_score
-current_score = 0
-
-
-
-#Przechowywanie pytan i odpowiedzi w slowniku
-global parameters
-parameters = {
-    "question": [],
-    "answer1": [],
-    "answer2": [],
-    "answer3": [],
-    "answer4": [],
-    "correct": [],
-    "score": [],
-    "random_question_index": [],
-}
-
-
-
-#Przechowywanie instancji widgetów w listach
-widgets = {
-    "logo": [],
-    "button": [],
-    "score": [],
-    "question": [],
-    "answer1": [],
-    "answer2": [],
-    "answer3": [],
-    "answer4": [],
-    "message": [],
-    "message2": [],
-    "difficulty-easy": [],
-    "difficulty-medium": [],
-    "difficulty-hard": [],
-}
-
+from globals import *
 
 
 #Inicjalizacja okna wraz z podstawowymi parametrami i tytułem
@@ -326,7 +282,7 @@ frame1()
 #Stworzenie funckji do wywolania frame'a w przypadku wygranej
 def frame3():
     #Widget z gratulacjami
-    message = QLabel("Congradulations! You\nare a G!\n your score is:")
+    message = QLabel("Congradulations! \n your score is:")
     message.setAlignment(QtCore.Qt.AlignRight)
     message.setStyleSheet(
         "font-family: 'Shanti';" +
@@ -375,7 +331,7 @@ def frame3():
     widgets["button"].append(button)
 
     #Logo widget
-    pixmap = QPixmap('Images/logo_bottom.png')
+    pixmap = QPixmap('Images/sport_quiz_bottom.png')
     logo = QLabel()
     logo.setPixmap(pixmap)
     logo.setAlignment(QtCore.Qt.AlignCenter)
@@ -392,10 +348,6 @@ def frame3():
     grid.addWidget(widgets["message2"][-1], 3, 0, 1, 2)
     grid.addWidget(widgets["button"][-1], 4, 0, 1, 2)
     grid.addWidget(widgets["logo"][-1], 5, 0, 2, 2)
-
-
-
-
 
 
 def frame4():
@@ -455,9 +407,6 @@ def frame4():
     grid.addWidget(widgets["score"][-1], 1, 1)
     grid.addWidget(widgets["button"][-1], 2, 0, 1, 2)
     grid.addWidget(widgets["logo"][-1], 3, 0, 1, 2)
-
-
-
 
 
 window.setLayout(grid)

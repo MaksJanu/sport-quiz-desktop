@@ -2,6 +2,7 @@ import random
 import html
 import requests
 import pandas as pd
+import pytest
 
 
 #Pobieranie z API bazy pytan i odpowiedzi o sportach
@@ -55,3 +56,36 @@ def preload_data(question_index, question_set, parameters):
         parameters[f"answer{i+1}"].append(all_answers[i])
 
     return all_answers
+
+
+
+#_________Testy_________
+
+def test_get_question_sets():
+    difficulty = "easy"
+    result = get_question_sets(difficulty)
+    assert isinstance(result, pd.DataFrame) or result == 0
+
+
+def test_preload_data():
+    question_index = 0
+    question_set = {
+        "question": ["What is the capital of France?"],
+        "correct_answer": ["Paris"],
+        "incorrect_answers": [["Berlin", "London", "Madrid"]]
+    }
+    parameters = {"question": [], "correct": [], "answer1": [], "answer2": [], "answer3": [], "answer4": []}
+    
+    all_answers = preload_data(question_index, question_set, parameters)
+
+    assert len(all_answers) == 4
+    assert len(parameters["question"]) == 1
+    assert len(parameters["correct"]) == 1
+    assert len(parameters["answer1"]) == 1
+    assert len(parameters["answer2"]) == 1
+    assert len(parameters["answer3"]) == 1
+    assert len(parameters["answer4"]) == 1
+    assert parameters["question"] == ["What is the capital of France?"]
+    assert parameters["correct"] == ["Paris"]
+    assert all_answers.count("Paris") == 1
+
