@@ -4,13 +4,14 @@ from PyQt5.QtGui import QPixmap
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 
-import json
-from datetime import datetime
 import requests
 import pandas as pd
 import random
 import html
 
+from file_functions import *
+from data_functions import *
+from clear_functions import *
 
 
 
@@ -20,58 +21,6 @@ global current_score
 current_score = 0
 
 
-#Pobieranie z API bazy pytan i odpowiedzi o sportach
-def get_question_sets(difficulty):
-    response = requests.get(url=f"https://opentdb.com/api.php?amount=15&category=21&difficulty={difficulty}&type=multiple")
-    print("API Response:", response.text)
-    if response.status_code == 200:
-        data = response.json()
-        if data["response_code"] == 0 and data["results"] != []:
-            df = pd.DataFrame(data["results"])
-            return df
-        else:
-            return 0
-    elif response.status_code != 200:
-        return 0
-
-
-
-#Przygotowanie odpowiedzi i pytan
-def preload_data(question_index, question_set):
-    question = html.unescape(question_set["question"][question_index])
-    correct_answer = html.unescape(question_set["correct_answer"][question_index])
-    wrong_answers = question_set["incorrect_answers"][question_index]
-
-    print("Question:", question)
-    print("Correct Answer:", correct_answer)
-    print("Wrong Answers:", wrong_answers)
-    #Zastapienie formatowania dla znakow
-    # formatting = [
-    #     ("#039", "'"),
-    #     ("&", "'"),
-    #     ("&quot;", '"'),
-    #     ("&lt;", "<"),
-    #     ("&gt;", ">"),
-    # ]
-
-    # #Zastapienie zlych znakow w stringach
-    # for tuple in formatting:
-    #     question = question.replace(tuple[0], tuple[1])
-    #     correct_answer = correct_answer.replace(tuple[0], tuple[1])
-    # #Zastapienia zlych znakow w listach
-    #     for tuple in formatting:
-    #         wrong_answers = [char.replace(tuple[0], tuple[1]) for char in wrong_answers]
-
-    parameters["question"].append(question)
-    parameters["correct"].append(correct_answer)
-    #Scalenie wszystkich odpowiedzi i przetasowanie
-    all_answers = wrong_answers + [correct_answer]
-    random.shuffle(all_answers)
-    #Dodawanie odpowiedzi do parameters
-    for i in range(0, 4):
-        parameters[f"answer{i+1}"].append(all_answers[i])
-
-    return all_answers
 
 #Przechowywanie pytan i odpowiedzi w slowniku
 global parameters
@@ -85,8 +34,6 @@ parameters = {
     "score": [],
     "random_question_index": [],
 }
-
-
 
 
 
@@ -118,31 +65,28 @@ window.move(2700, 200)
 window.setStyleSheet("background: #4d4c4d;")
 
 
-
-
-
 #Zainicjalizowanie gridu pod widgety
 grid = QGridLayout()
 
 
-
-#Stworzenie funkcji, ktora odpowiada za usuwanie widgetow
-def clear_widgets():
-    for widget_name in widgets:
-        if widgets[widget_name] != []:
-            widgets[widget_name][-1].hide()
-        for _ in range(0, len(widgets[widget_name])):
-            widgets[widget_name].pop()
+#Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
+def show_frame1():
+    clear_widgets(widgets)
+    frame1()
 
 
-#Stworzenie funkcji, ktora odpowiada za usuwanie parametrow
-def clear_parameters():
-    for parm in parameters:
-        if parameters[parm] != []:
-            for _ in range(0, len(parameters[parm])):
-                parameters[parm].pop()
-    parameters["random_question_index"].append(random.randint(0, 14))
-    parameters["score"].append(0)
+#Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
+def start_game(difficulty_level):
+    print(difficulty_level)
+    if difficulty_level != "" and difficulty_level != None:
+        questions_set = get_question_sets(difficulty_level)
+        if type(questions_set) == int:
+            print("API NIE DZIALA")
+        else:
+            clear_widgets(widgets)
+            clear_parameters(parameters)
+            preload_data(parameters["random_question_index"][-1], questions_set, parameters)
+            frame2()
 
 
 #Aktualizacja nazwy difficulty
@@ -159,91 +103,6 @@ def on_button_click(button):
     global difficulty
     difficulty = button.text().lower()
     print(difficulty)
-
-
-#Stworzenie funkcji do zapisu czasu i scorea wraz z sortowaniem
-def write_to_json(points, level):
-    # Sprawdzanie, czy plik JSON już istnieje
-    try:
-        with open('score.json', 'r') as file:
-            data = json.load(file)
-    except FileNotFoundError:
-        # Jeśli plik nie istnieje, tworzymy nowy pusty słownik
-        data = {"rekordy": []}
-
-    # Pobieranie aktualnej daty oraz czasu
-    now = datetime.now()
-    time = now.strftime("%H:%M:%S")
-
-    # Dodawanie nowego rekordu z czasem i punktacją
-    new_record = {
-        "czas": time,
-        "punktacja": points,
-        "poziom trudnosci": level,
-    }
-    # Dodawanie nowego rekordu do listy rekordów
-    data["rekordy"].append(new_record)
-
-    # Zapisywanie danych z powrotem do pliku JSON
-    with open('score.json', 'w') as file:
-        json.dump(data, file, indent=2)
-
-
-#Funkcja do sortowania score.json po wynikach malejaca
-def sort_records_by_points():
-    try:
-        with open('score.json', 'r') as file:
-            data = json.load(file)
-    except FileNotFoundError:
-        print("Brak pliku z danymi.")
-        return
-
-    # Pobranie listy rekordów
-    records = data.get("rekordy", [])
-
-    # Sortowanie bąbelkowe rekordów według punktacji
-    n = len(records)
-    for i in range(n - 1):
-        for j in range(0, n - i - 1):
-            if records[j]["punktacja"] < records[j + 1]["punktacja"]:
-                # Zamiana miejscami, jeśli punktacja jest w niewłaściwej kolejności
-                records[j], records[j + 1] = records[j + 1], records[j]
-
-    # Aktualizacja danych w słowniku
-    data["rekordy"] = records
-
-    # Zapisywanie posortowanych danych z powrotem do pliku JSON
-    with open('score.json', 'w') as file:
-        json.dump(data, file, indent=2)
-
-
-
-
-
-
-
-
-
-#Stworzenie funkcji do pokazania okna startowego(pokazanie pierwszego frame'a)
-def show_frame1():
-    clear_widgets()
-    frame1()
-
-
-#Stworzenie funkcji do startu gry(pokazanie drugiego frame'a)
-def start_game(difficulty_level):
-    print(difficulty_level)
-    if difficulty_level != "" and difficulty_level != None:
-        questions_set = get_question_sets(difficulty_level)
-        if type(questions_set) == int:
-            print("API NIE DZIALA")
-        else:
-            clear_widgets()
-            clear_parameters()
-            preload_data(parameters["random_question_index"][-1], questions_set)
-            frame2()
-    # Dodaj czasomierz jako pasek postępu
-
 
 
 
@@ -281,7 +140,7 @@ def is_correct(btn):
         if type(questions_set) == int:
             print("API NIE DZIALA")
         else:
-            preload_data(parameters["random_question_index"][-1],questions_set)
+            preload_data(parameters["random_question_index"][-1],questions_set, parameters)
             #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania oraz scorea
             global current_score
             current_score += 10
@@ -294,13 +153,13 @@ def is_correct(btn):
         if current_score == 100:
             write_to_json(current_score, difficulty)
             sort_records_by_points()
-            clear_widgets()
+            clear_widgets(widgets)
             frame3()
     else:
         #Wywolanie kodu po blednej odpowiedzi
         write_to_json(current_score, difficulty)
         sort_records_by_points()
-        clear_widgets()
+        clear_widgets(widgets)
         frame4()
         
 
@@ -309,7 +168,7 @@ def is_correct(btn):
 def frame1():
     global current_score
     current_score = 0
-    clear_widgets()
+    clear_widgets(widgets)
     #Wrzucenie grafiki i dostosowanie stylu
     image = QPixmap("Images/sport_quiz.png")
     logo = QLabel()

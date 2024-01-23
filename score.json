@@ -1,24 +1,39 @@
 {
   "rekordy": [
     {
-      "czas": "17:45:59",
-      "punktacja": 30,
+      "czas": "18:10:13",
+      "punktacja": 10,
       "poziom trudnosci": "easy"
     },
     {
-      "czas": "17:43:56",
+      "czas": "18:18:30",
+      "punktacja": 10,
+      "poziom trudnosci": "easy"
+    },
+    {
+      "czas": "18:05:00",
       "punktacja": 0,
       "poziom trudnosci": "easy"
     },
     {
-      "czas": "17:44:11",
+      "czas": "18:12:10",
       "punktacja": 0,
       "poziom trudnosci": "medium"
     },
     {
-      "czas": "17:44:21",
+      "czas": "18:13:19",
       "punktacja": 0,
       "poziom trudnosci": "easy"
+    },
+    {
+      "czas": "18:13:25",
+      "punktacja": 0,
+      "poziom trudnosci": "medium"
+    },
+    {
+      "czas": "18:26:53",
+      "punktacja": 0,
+      "poziom trudnosci": "hard"
     }
   ]
 }
