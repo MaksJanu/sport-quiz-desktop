@@ -11,6 +11,9 @@ import pandas as pd
 import random
 import html
 
+
+
+
 global difficulty
 difficulty=""
 global current_score
@@ -159,15 +162,60 @@ def on_button_click(button):
 
 
 #Stworzenie funkcji do zapisu czasu i scorea wraz z sortowaniem
-def write_to_json(points):
+def write_to_json(points, level):
+    # Sprawdzanie, czy plik JSON już istnieje
+    try:
+        with open('score.json', 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        # Jeśli plik nie istnieje, tworzymy nowy pusty słownik
+        data = {"rekordy": []}
+
+    # Pobieranie aktualnej daty oraz czasu
     now = datetime.now()
     time = now.strftime("%H:%M:%S")
-    score_data = {
-        "godzina": time,
+
+    # Dodawanie nowego rekordu z czasem i punktacją
+    new_record = {
+        "czas": time,
         "punktacja": points,
+        "poziom trudnosci": level,
     }
-    with open(file = "score.json", mode = "w+", encoding = "UTF-8") as file:
-        json.dump(score_data, file)
+    # Dodawanie nowego rekordu do listy rekordów
+    data["rekordy"].append(new_record)
+
+    # Zapisywanie danych z powrotem do pliku JSON
+    with open('score.json', 'w') as file:
+        json.dump(data, file, indent=2)
+
+
+#Funkcja do sortowania score.json po wynikach malejaca
+def sort_records_by_points():
+    try:
+        with open('score.json', 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        print("Brak pliku z danymi.")
+        return
+
+    # Pobranie listy rekordów
+    records = data.get("rekordy", [])
+
+    # Sortowanie bąbelkowe rekordów według punktacji
+    n = len(records)
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            if records[j]["punktacja"] < records[j + 1]["punktacja"]:
+                # Zamiana miejscami, jeśli punktacja jest w niewłaściwej kolejności
+                records[j], records[j + 1] = records[j + 1], records[j]
+
+    # Aktualizacja danych w słowniku
+    data["rekordy"] = records
+
+    # Zapisywanie posortowanych danych z powrotem do pliku JSON
+    with open('score.json', 'w') as file:
+        json.dump(data, file, indent=2)
+
 
 
 
@@ -244,12 +292,14 @@ def is_correct(btn):
                 widgets[f"answer{i}"][0].setText(str(parameters[f"answer{i}"][-1]))
 
         if current_score == 100:
-            write_to_json(current_score)
+            write_to_json(current_score, difficulty)
+            sort_records_by_points()
             clear_widgets()
             frame3()
     else:
         #Wywolanie kodu po blednej odpowiedzi
-        write_to_json(current_score)
+        write_to_json(current_score, difficulty)
+        sort_records_by_points()
         clear_widgets()
         frame4()
         
