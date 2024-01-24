@@ -36,7 +36,7 @@ def start_game(difficulty_level):
     if difficulty_level != "" and difficulty_level != None:
         questions_set = get_question_sets(difficulty_level)
         if type(questions_set) == int:
-            print("API NIE DZIALA")
+            print("API NIE DZIALA: PONOW KLIKNIECIE")
         else:
             clear_widgets(widgets)
             clear_parameters(parameters)
