@@ -7,10 +7,9 @@ import os
 def write_to_json(points, level):
     # Sprawdzanie, czy plik JSON już istnieje
     try:
-        with open('score.json', 'r') as file:
+        with open("score.json", "r") as file:
             data = json.load(file)
     except FileNotFoundError:
-        # Jeśli plik nie istnieje, tworzymy nowy pusty słownik
         data = {"rekordy": []}
     # Pobieranie aktualnej daty oraz czasu
     now = datetime.now()
@@ -25,14 +24,14 @@ def write_to_json(points, level):
     data["rekordy"].append(new_record)
 
     # Zapisywanie danych z powrotem do pliku JSON
-    with open('score.json', 'w') as file:
+    with open("score.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
 #Funkcja do sortowania score.json po wynikach malejaca
 def sort_records_by_points():
     try:
-        with open('score.json', 'r') as file:
+        with open("score.json", "r") as file:
             data = json.load(file)
     except FileNotFoundError:
         print("Brak pliku z danymi.")
@@ -49,7 +48,7 @@ def sort_records_by_points():
     # Aktualizacja danych w słowniku
     data["rekordy"] = records
     # Zapisywanie posortowanych danych z powrotem do pliku JSON
-    with open('score.json', 'w') as file:
+    with open("score.json", "w") as file:
         json.dump(data, file, indent=2)
 
 
@@ -60,7 +59,7 @@ def sort_records_by_points():
 # Funkcja pomocnicza do usuwania pliku JSON przed testami
 def remove_score_file():
     try:
-        os.remove('score.json')
+        os.remove("score.json")
     except FileNotFoundError:
         pass
 
@@ -74,4 +73,4 @@ def test_write_to_json():
     # Wywołanie funkcji write_to_json
     write_to_json(points, level)
     # Sprawdzenie, czy plik score.json został utworzony
-    assert os.path.exists('score.json')
+    assert os.path.exists("score.json")
