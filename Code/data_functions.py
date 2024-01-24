@@ -2,7 +2,6 @@ import random
 import html
 import requests
 import pandas as pd
-import pytest
 
 
 #Pobieranie z API bazy pytan i odpowiedzi o sportach
@@ -29,7 +28,7 @@ def preload_data(question_index, question_set, parameters):
     print("Question:", question)
     print("Correct Answer:", correct_answer)
     print("Wrong Answers:", wrong_answers)
-    #Zastapienie formatowania dla znakow
+    #Zastapienie formatowania dla znakow z uzyciem krotek, ale niestety czasami zle zastepuje i zastapilem to html.unescape
     # formatting = [
     #     ("#039", "'"),
     #     ("&", "'"),
