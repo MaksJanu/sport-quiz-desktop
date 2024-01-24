@@ -43,7 +43,7 @@ def test_clear_widgets():
     assert all(not widget_list for widget_list in widgets.values())
 
 
-
+#Generowanie dekoratorem losowej wartosci do testu
 @patch('random.randint', return_value=9)
 def test_clear_parameters_another_case():
     parameters = {

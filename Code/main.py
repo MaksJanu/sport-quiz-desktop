@@ -5,7 +5,6 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
 
 import random
-
 from file_functions import *
 from data_functions import *
 from clear_functions import *
@@ -94,7 +93,7 @@ def is_correct(btn):
         questions_set=get_question_sets(difficulty)
         #Handlowanie bledow wynikajacych z api
         if type(questions_set) == int:
-            print("API NIE DZIALA")
+            print("API NIE ODPOWIADA: PONOW KLIKNIECIE")
         else:
             preload_data(parameters["random_question_index"][-1],questions_set, parameters)
             #Aktualizowanie nazw widgetow: question i answery dla kolejnego pytania oraz scorea
